@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="./mqttws31.js"></script>
+  <script type="text/javascript">
+
+  var client;
+
+  function doConnect() {
+
+    client = new Messaging.Client("m2m.eclipse.org", 80, "simpleweb");
+    console.log("Client instantiated.");
+    client.startTrace();
+    //client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+    client.connect({onSuccess:onConnect});
+
+    console.log("Now trying to connect...");
+  }
+
+  function onConnect() {
+
+    console.log("connection established");
+    doSubscribe();
+    doPublish();
+
+  }
+
+  function doSubscribe() {
+      client.subscribe("/topic1");
+      console.log("subscribed");
+  }
+
+  function doPublish() {
+    message = new Messaging.Message("Hello");
+    message.destinationName = "/topic1";
+    client.send(message);
+    console.log("sent");
+  }
+
+  function onMessageArrived(message) {
+    document.getElementById("message").innerHTML = message.payloadString;
+    console.log("message in");
+    client.disconnect();
+    document.getElementById("trace").innerHTML = client.getTraceLog();
+  }
+
+  window.onload = function() {
+
+      this.doConnect();
+    }
+  </script>
+</head>
+<body><h3><div id="message"></div></h3><code><div id="trace"></div></code></body>
+</html>
